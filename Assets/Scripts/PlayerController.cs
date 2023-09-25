@@ -14,11 +14,13 @@ public class PlayerController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private GameObject cameraObject;
+    [SerializeField] private CameraController cameraItem;
 
     private Rigidbody rigidBody => GetComponent<Rigidbody>();
     private CapsuleCollider capsuleCollider => GetComponent<CapsuleCollider>();
     private float originalCameraHeight;
     private bool isCrouching = false;
+    private bool isAiming = false;
     private float cameraRotationX = 0f;
     private bool cursorVisible = true;
 
@@ -48,6 +50,15 @@ public class PlayerController : MonoBehaviour
         else
         {
             Uncrouch();
+        }
+
+        if (Input.GetMouseButton(1))
+        {
+            AimCamera();
+        }
+        else
+        {
+            UnaimCamera();
         }
 
         if (Input.GetKey(KeyCode.LeftShift) & !isCrouching)
@@ -99,6 +110,24 @@ public class PlayerController : MonoBehaviour
         {
             capsuleCollider.height = standingHeight;
             isCrouching = false;
+        }
+    }
+
+    private void AimCamera()
+    {
+        if (!isAiming)
+        {
+            cameraItem.Aim();
+            isAiming = true;
+        }
+    }
+
+    private void UnaimCamera()
+    {
+        if (isAiming)
+        {
+            cameraItem.Unaim();
+            isAiming = false;
         }
     }
 
