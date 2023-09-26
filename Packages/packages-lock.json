@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.kellojo.urp-sun-shafts": {
+      "version": "https://github.com/Kellojo/URP-Sun-Shafts.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "66f7ba8f30555670fdf361e0167abe2580db0ed0"
+    },
     "com.unity.burst": {
       "version": "1.8.7",
       "depth": 1,
