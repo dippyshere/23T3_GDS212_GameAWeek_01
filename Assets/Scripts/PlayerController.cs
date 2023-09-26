@@ -18,16 +18,15 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody rigidBody => GetComponent<Rigidbody>();
     private CapsuleCollider capsuleCollider => GetComponent<CapsuleCollider>();
-    private float originalCameraHeight;
     private bool isCrouching = false;
     private bool isAiming = false;
     private float cameraRotationX = 0f;
+    private float cameraRotationY = 0f;
     private bool cursorVisible = true;
 
     // Start is called before the first frame update
     void Start()
     {
-        originalCameraHeight = cameraObject.transform.localPosition.y;
         LockMouse();
     }
 
@@ -35,10 +34,10 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // Camera
-        transform.Rotate(Vector3.up * Input.GetAxis("Mouse X") * rotationSpeed);
         cameraRotationX -= Input.GetAxis("Mouse Y") * rotationSpeed;
         cameraRotationX = Mathf.Clamp(cameraRotationX, -89f, 89f);
-        cameraObject.transform.localRotation = Quaternion.Euler(cameraRotationX, 0f, 0f);
+        cameraRotationY += Input.GetAxis("Mouse X") * rotationSpeed;
+        cameraObject.transform.localRotation = Quaternion.Euler(cameraRotationX, cameraRotationY, 0f);
 
         // Movement
         float moveSpeed = walkSpeed;
@@ -68,7 +67,10 @@ public class PlayerController : MonoBehaviour
 
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
-        rigidBody.velocity = transform.right * horizontalInput * moveSpeed + transform.forward * verticalInput * moveSpeed + Vector3.up * rigidBody.velocity.y;
+        // set rigidbody velocity based on current transforms
+        // rigidBody.velocity = transform.right * horizontalInput * moveSpeed + transform.forward * verticalInput * moveSpeed + Vector3.up * rigidBody.velocity.y;
+        // set rigidbody velocity based on camera transforms (but only the y rotation)
+        rigidBody.velocity = Quaternion.Euler(0, cameraObject.transform.rotation.eulerAngles.y, 0) * new Vector3(horizontalInput * moveSpeed, rigidBody.velocity.y, verticalInput * moveSpeed);
 
         // Jumping
         if (Input.GetButtonDown("Jump") && IsGrounded())
