@@ -12,6 +12,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector3 aimPosition;
     [SerializeField] private Vector3 aimRotation;
 
+    private bool isAiming = false;
+
 
     // Start is called before the first frame update
     void Start()
@@ -25,10 +27,18 @@ public class CameraController : MonoBehaviour
         
     }
 
-    IEnumerator InterpCamera(Vector3 position, Vector3 rotation)
+    IEnumerator InterpCamera(Vector3 position, Vector3 rotation, bool aimSwitch)
     {
         while (Vector3.Distance(transform.localPosition, position) > 0.01f)
         {
+            if (aimSwitch && !isAiming)
+            {
+                yield break;
+            }
+            if (!aimSwitch && isAiming)
+            {
+                yield break;
+            }
             transform.localPosition = Vector3.Lerp(transform.localPosition, position, interpSpeed * Time.deltaTime);
             transform.localRotation = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(rotation), interpRotationSpeed * Time.deltaTime);
             yield return null;
@@ -37,11 +47,13 @@ public class CameraController : MonoBehaviour
 
     public void Aim()
     {
-        StartCoroutine(InterpCamera(aimPosition, aimRotation));
+        isAiming = true;
+        StartCoroutine(InterpCamera(aimPosition, aimRotation, true));
     }
 
     public void Unaim()
     {
-        StartCoroutine(InterpCamera(defaultPosition, defaultRotation));
+        isAiming = false;
+        StartCoroutine(InterpCamera(defaultPosition, defaultRotation, false));
     }
 }
