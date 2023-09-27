@@ -59,6 +59,10 @@ public class PlayerController : MonoBehaviour
         {
             UnaimCamera();
         }
+        if (Input.GetMouseButton(0) & isAiming)
+        {
+            cameraItem.TakePhoto();
+        }
 
         if (Input.GetKey(KeyCode.LeftShift) & !isCrouching)
         {
@@ -80,14 +84,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (!cursorVisible)
-            {
-                UnlockMouse();
-            }
-            else
-            {
-                LockMouse();
-            }
+            LockMouse();
         }
     }
 
