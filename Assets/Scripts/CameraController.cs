@@ -21,6 +21,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private RawImage photoPreview;
     [SerializeField] private TextMeshProUGUI photoPreviewText;
     [SerializeField] private PhotoScoringManager photoScoringManager;
+    [SerializeField] private TextMeshProUGUI photoScores;
 
     [Header("Debug")]
     [SerializeField] private GameObject debugPhotoObject;
@@ -28,7 +29,56 @@ public class CameraController : MonoBehaviour
     private bool isAiming = false;
     private Camera cameraComponent => cameraObject.GetComponent<Camera>();
     private bool wasInactive = false;
+    private GameObject captureObject;
 
+    private string[] compliments = {
+        "Great shot!",
+        "Absolutely stunning!",
+        "Impressive composition!",
+        "Wonderful capture!",
+        "Incredible work!",
+        "You nailed it!",
+        "Bravo!",
+        "A work of art!",
+        "This is picture-perfect!"
+    };
+
+    private string[] catCompliments =
+    {
+        "You've got purr-fect photography skills!",
+        "This photo is the cat's meow!",
+        "Your photography skills are claw-some!",
+        "This shot is absolutely fur-tastic!",
+        "Meowgnificent work!",
+        "Your photography is the cat-ch of the day!",
+        "Pawsitively impressive!"
+    };
+
+    private string[] dissapointments =
+    {
+        "While the object may be missing, your photography skills still shine!",
+        "Even without the object, your photo is a standout.",
+        "You've captured a different kind of beauty in this shot.",
+        "Your creativity knows no bounds, even without the object.",
+        "The absence of the object has its own unique charm.",
+        "Your photography is versatile and always impressive.",
+        "Sometimes the unexpected can lead to extraordinary results.",
+        "Even without the object, your photo is a masterpiece.",
+        "Your talent transcends the need for the object."
+    };
+
+    private string[] catDissapointments =
+    {
+        "Oops, looks like the cat's taking a nap elsewhere!",
+        "The purr-fect shot is still up for grabs!",
+        "No sign of whiskers in this photo!",
+        "The cat must be on a secret mission.",
+        "Looks like the cat is playing hide and seek!",
+        "The cat's invisibility cloak must be on!",
+        "Cat-astrophe! The feline vanished from the frame.",
+        "The cat has gone incognito in this one.",
+        "No cat-tastic cameo in this shot!"
+    };
 
     // Start is called before the first frame update
     void Start()
@@ -111,7 +161,6 @@ public class CameraController : MonoBehaviour
             cameraObject.SetActive(false);
         }
         photoPreview.texture = photo;
-        photoPreviewText.text = debugPhotoObject.name;
         if (Random.Range(0, 2) == 0)
         {
             photoPreview.transform.parent.rotation = Quaternion.Euler(0, 0, Random.Range(-12f, -5f));
@@ -132,8 +181,50 @@ public class CameraController : MonoBehaviour
         string photos = PlayerPrefs.GetString("photos", "");
         photos += uuid + ",";
         PlayerPrefs.SetString("photos", photos);
-        List<float> photoScore = photoScoringManager.ScorePhoto(debugPhotoObject);
-        Debug.Log("Photo score: Visibility: " + photoScore[0] + " Object Visibility: " + photoScore[1] + " Object Size: " + photoScore[2] + " Centering: " + photoScore[3] + " Rule of Thirds: " + photoScore[4]);
+        if (GameManager.Instance.currentObjectIndex >= 2)
+        {
+            captureObject = debugPhotoObject;
+        }
+        else
+        {
+            captureObject = GameManager.Instance.objectsToCapture[GameManager.Instance.currentObjectIndex];
+        }
+        photoPreviewText.text = captureObject.name;
+        List<float> photoScore = photoScoringManager.ScorePhoto(captureObject);
+        Debug.Log("Photo score: Visibility: " + photoScore[0] + " Object Visibility: " + photoScore[1] + " Centering: " + photoScore[3] + " Rule of Thirds: " + photoScore[4]);
         PlayerPrefs.SetString(uuid, string.Join(",", photoScore));
+        if (photoScore[0] > 0)
+        {
+            photoScores.text = $"\nVisibility: {Mathf.CeilToInt(photoScore[1] * photoScoringManager.objectVisibilityWeight)}";
+            if (photoScore[3] >= photoScore[4])
+            {
+                photoScores.text += $"\nCentering: {Mathf.CeilToInt(photoScore[3] * photoScoringManager.centeringWeight)}\n\n";
+            }
+            else
+            {
+                photoScores.text += $"\nRule of Thirds: {Mathf.CeilToInt(photoScore[4] * photoScoringManager.ruleOfThirdsWeight)}\n\n";
+            }
+            if (captureObject.CompareTag("Cat"))
+            {
+                photoScores.text += catCompliments[Random.Range(0, catCompliments.Length)];
+            }
+            else
+            {
+                photoScores.text += compliments[Random.Range(0, compliments.Length)];
+            }
+            GameManager.Instance.IncrementObjectIndex();
+        }
+        else
+        {
+            photoScores.text = "\nVisibility: 0\n\n";
+            if (captureObject.CompareTag("Cat"))
+            {
+                photoScores.text += catDissapointments[Random.Range(0, catDissapointments.Length)];
+            }
+            else
+            {
+                photoScores.text += dissapointments[Random.Range(0, dissapointments.Length)];
+            }
+        }
     }
 }

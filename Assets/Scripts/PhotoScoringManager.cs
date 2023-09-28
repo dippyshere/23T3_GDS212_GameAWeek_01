@@ -5,14 +5,11 @@ using UnityEngine;
 public class PhotoScoringManager : MonoBehaviour
 {
     [Header("Weights")]
-    [SerializeField] private float visibilityWeight = 1.0f;
-    [SerializeField] private float objectVisibilityWeight = 1.0f;
-    [SerializeField] private float objectSizeWeight = 1.0f;
-    [SerializeField] private float angleWeight = 1.0f;
-    [SerializeField] private float centeringWeight = 1.0f;
-    [SerializeField] private float ruleOfThirdsWeight = 1.0f;
-    [SerializeField] private float minObjectSize = 0.2f;
-    [SerializeField] private float maxObjectSize = 0.8f;
+    public float visibilityWeight = 1.0f;
+    public float objectVisibilityWeight = 400.0f;
+    public float objectSizeWeight = 1.0f;
+    public float centeringWeight = 350.0f;
+    public float ruleOfThirdsWeight = 450.0f;
 
     [Header("References")]
     [SerializeField] private GameObject cameraObject;
@@ -42,7 +39,11 @@ public class PhotoScoringManager : MonoBehaviour
     /// <returns></returns>
     private float CalculateVisibility(GameObject photoObject)
     {
-        MeshRenderer meshRenderer = photoObject.GetComponent<MeshRenderer>();
+        Renderer meshRenderer = photoObject.GetComponent<Renderer>();
+        if (meshRenderer == null)
+        {
+            meshRenderer = photoObject.GetComponentInChildren<Renderer>();
+        }
         // Check if the object is visible from the specified camera
         bool isInFrustum = GeometryUtility.TestPlanesAABB(GeometryUtility.CalculateFrustumPlanes(cameraComponent), meshRenderer.bounds);
         Debug.Log("Is in frustum: " + isInFrustum);
@@ -60,7 +61,12 @@ public class PhotoScoringManager : MonoBehaviour
     /// <returns></returns>
     private float CalculateObjectVisibility(GameObject photoObject)
     {
-        Bounds bounds = photoObject.GetComponent<Renderer>().bounds;
+        Renderer objectRenderer = photoObject.GetComponent<Renderer>();
+        if (objectRenderer == null)
+        {
+            objectRenderer = photoObject.GetComponentInChildren<Renderer>();
+        }
+        Bounds bounds = objectRenderer.bounds;
         int gridSize = 10;
         float stepX = bounds.size.x / gridSize;
         float stepY = bounds.size.y / gridSize;
@@ -140,7 +146,12 @@ public class PhotoScoringManager : MonoBehaviour
     {
         float screenWidth = Screen.width;
         float screenHeight = Screen.height;
-        Vector3 screenPosition = cameraComponent.WorldToScreenPoint(photoObject.GetComponent<Renderer>().bounds.center);
+        Renderer objectRenderer = photoObject.GetComponent<Renderer>();
+        if (objectRenderer == null)
+        {
+            objectRenderer = photoObject.GetComponentInChildren<Renderer>();
+        }
+        Vector3 screenPosition = cameraComponent.WorldToScreenPoint(objectRenderer.bounds.center);
 
         // calculate the 4 points of the rule of thirds grid
         Vector3 ruleOfThirdsTopLeft = new Vector3(screenWidth / 3, screenHeight / 3, 0);
