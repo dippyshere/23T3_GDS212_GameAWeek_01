@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
         {
             UnaimCamera();
         }
-        if (Input.GetMouseButton(0) & isAiming)
+        if (Input.GetMouseButtonDown(0) & isAiming)
         {
             cameraItem.TakePhoto();
         }
@@ -71,9 +71,6 @@ public class PlayerController : MonoBehaviour
 
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
-        // set rigidbody velocity based on current transforms
-        // rigidBody.velocity = transform.right * horizontalInput * moveSpeed + transform.forward * verticalInput * moveSpeed + Vector3.up * rigidBody.velocity.y;
-        // set rigidbody velocity based on camera transforms (but only the y rotation)
         rigidBody.velocity = Quaternion.Euler(0, cameraObject.transform.rotation.eulerAngles.y, 0) * new Vector3(horizontalInput * moveSpeed, rigidBody.velocity.y, verticalInput * moveSpeed);
 
         // Jumping
