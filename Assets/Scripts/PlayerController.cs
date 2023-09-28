@@ -22,7 +22,6 @@ public class PlayerController : MonoBehaviour
     private bool isAiming = false;
     private float cameraRotationX = 0f;
     private float cameraRotationY = 0f;
-    private bool cursorVisible = true;
 
     // Start is called before the first frame update
     void Start()
@@ -131,14 +130,12 @@ public class PlayerController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        cursorVisible = true;
     }
 
     void LockMouse()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        cursorVisible = false;
     }
 
     private void OnDrawGizmos()

@@ -2535,7 +2535,7 @@ MonoBehaviour:
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
-  m_Dithering: 0
+  m_Dithering: 1
   m_ClearDepth: 1
   m_AllowXRRendering: 1
   m_AllowHDROutput: 1
@@ -2659,6 +2659,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6875502459622363876, guid: 5a858bebb547fe4439810cf341735ae7,
+        type: 3}
+      propertyPath: m_Dithering
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6875502459622363876, guid: 5a858bebb547fe4439810cf341735ae7,
         type: 3}
