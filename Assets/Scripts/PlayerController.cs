@@ -33,9 +33,19 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // Camera
-        cameraRotationX -= Input.GetAxis("Mouse Y") * rotationSpeed;
-        cameraRotationX = Mathf.Clamp(cameraRotationX, -89f, 89f);
-        cameraRotationY += Input.GetAxis("Mouse X") * rotationSpeed;
+        // if on webgl, divide the camerarotation x and y by 2 to fix webgl quirk
+        if (Application.platform == RuntimePlatform.WebGLPlayer)
+        {
+            cameraRotationX -= (Input.GetAxis("Mouse Y") / 2) * rotationSpeed;
+            cameraRotationX = Mathf.Clamp(cameraRotationX, -89f, 89f);
+            cameraRotationY += (Input.GetAxis("Mouse X") / 2) * rotationSpeed;
+        }
+        else
+        {
+            cameraRotationX -= Input.GetAxis("Mouse Y") * rotationSpeed;
+            cameraRotationX = Mathf.Clamp(cameraRotationX, -89f, 89f);
+            cameraRotationY += Input.GetAxis("Mouse X") * rotationSpeed;
+        }
         cameraObject.transform.localRotation = Quaternion.Euler(cameraRotationX, cameraRotationY, 0f);
 
         // Movement
