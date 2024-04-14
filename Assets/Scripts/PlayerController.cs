@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
 
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
-        rigidBody.velocity = Quaternion.Euler(0, cameraObject.transform.rotation.eulerAngles.y, 0) * new Vector3(horizontalInput * moveSpeed, rigidBody.velocity.y, verticalInput * moveSpeed);
+        rigidBody.linearVelocity = Quaternion.Euler(0, cameraObject.transform.rotation.eulerAngles.y, 0) * new Vector3(horizontalInput * moveSpeed, rigidBody.linearVelocity.y, verticalInput * moveSpeed);
 
         // Jumping
         if (Input.GetButtonDown("Jump") && IsGrounded())
