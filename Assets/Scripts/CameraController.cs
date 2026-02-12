@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class CameraController : MonoBehaviour
 {
+    static readonly int Photo = Animator.StringToHash("TakePhoto");
+
     [Header("Camera Settings")]
     [SerializeField] private float interpSpeed = 2.0f;
     [SerializeField] private float interpRotationSpeed = 2.0f;
@@ -80,30 +82,17 @@ public class CameraController : MonoBehaviour
         "No cat-tastic cameo in this shot!"
     };
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     IEnumerator InterpCamera(Vector3 position, Vector3 rotation, bool aimSwitch)
     {
         while (Vector3.Distance(transform.localPosition, position) > 0.01f)
         {
-            if (aimSwitch && !isAiming)
+            switch (aimSwitch)
             {
-                yield break;
+                case true when !isAiming:
+                case false when isAiming:
+                    yield break;
             }
-            if (!aimSwitch && isAiming)
-            {
-                yield break;
-            }
+
             transform.localPosition = Vector3.Lerp(transform.localPosition, position, interpSpeed * Time.deltaTime);
             transform.localRotation = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(rotation), interpRotationSpeed * Time.deltaTime);
             yield return null;
@@ -124,8 +113,8 @@ public class CameraController : MonoBehaviour
 
     public void TakePhoto()
     {
-        photoPreviewAnimator.SetTrigger("TakePhoto");
-        photoFlashAnimator.SetTrigger("TakePhoto");
+        photoPreviewAnimator.SetTrigger(Photo);
+        photoFlashAnimator.SetTrigger(Photo);
         StartCoroutine(CapturePhoto());
     }
 

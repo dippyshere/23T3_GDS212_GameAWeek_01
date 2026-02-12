@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Player Settings")]
     [SerializeField] private float walkSpeed = 5.0f;
     [SerializeField] private float sprintMultiplier = 2.0f;
-    [SerializeField] private float rotationSpeed = 2.0f;
     [SerializeField] private float jumpForce = 5.0f;
     [SerializeField] private float crouchHeight = 0.5f;
     [SerializeField] private float standingHeight = 2.0f;
@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     [SerializeField] private GameObject cameraObject;
     [SerializeField] private CameraController cameraItem;
+    public SaveLoad saveLoad;
 
     private Rigidbody rigidBody => GetComponent<Rigidbody>();
     private CapsuleCollider capsuleCollider => GetComponent<CapsuleCollider>();
@@ -22,36 +23,62 @@ public class PlayerController : MonoBehaviour
     private bool isAiming = false;
     private float cameraRotationX = 0f;
     private float cameraRotationY = 0f;
+    public bool isUIOpen = false;
+
+    InputAction moveAction;
+    InputAction lookAction;
+    InputAction jumpAction;
+    InputAction crouchAction;
+    InputAction sprintAction;
+    InputAction aimAction;
+    InputAction photoAction;
+    InputAction SDCardAction;
 
     // Start is called before the first frame update
     void Start()
     {
         LockMouse();
+        moveAction = InputSystem.actions.FindAction("Move");
+        lookAction = InputSystem.actions.FindAction("Look");
+        jumpAction = InputSystem.actions.FindAction("Jump");
+        crouchAction = InputSystem.actions.FindAction("Crouch");
+        sprintAction = InputSystem.actions.FindAction("Sprint");
+        aimAction = InputSystem.actions.FindAction("Aim");
+        photoAction = InputSystem.actions.FindAction("Photo");
+        SDCardAction = InputSystem.actions.FindAction("SDCard");
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (SDCardAction.WasPressedThisFrame())
+        {
+            if (isUIOpen)
+            {
+                saveLoad.HideImages();
+                LockMouse();
+            }
+            else
+            {
+                saveLoad.LoadImages();
+                UnlockMouse();
+            }
+        }
+        if (isUIOpen)
+        {
+            rigidBody.linearVelocity = Vector3.zero;
+            return;
+        }
         // Camera
-        // if on webgl, divide the camerarotation x and y by 2 to fix webgl quirk
-        if (Application.platform == RuntimePlatform.WebGLPlayer)
-        {
-            cameraRotationX -= (Input.GetAxis("Mouse Y") / 2) * rotationSpeed;
-            cameraRotationX = Mathf.Clamp(cameraRotationX, -89f, 89f);
-            cameraRotationY += (Input.GetAxis("Mouse X") / 2) * rotationSpeed;
-        }
-        else
-        {
-            cameraRotationX -= Input.GetAxis("Mouse Y") * rotationSpeed;
-            cameraRotationX = Mathf.Clamp(cameraRotationX, -89f, 89f);
-            cameraRotationY += Input.GetAxis("Mouse X") * rotationSpeed;
-        }
+        cameraRotationX -= lookAction.ReadValue<Vector2>().y;
+        cameraRotationY += lookAction.ReadValue<Vector2>().x;
+        cameraRotationX = Mathf.Clamp(cameraRotationX, -88f, 88f);
         cameraObject.transform.localRotation = Quaternion.Euler(cameraRotationX, cameraRotationY, 0f);
 
         // Movement
         float moveSpeed = walkSpeed;
 
-        if (Input.GetKey(KeyCode.C))
+        if (crouchAction.IsInProgress())
         {
             Crouch();
         }
@@ -60,7 +87,7 @@ public class PlayerController : MonoBehaviour
             Uncrouch();
         }
 
-        if (Input.GetMouseButton(1))
+        if (aimAction.IsInProgress())
         {
             AimCamera();
         }
@@ -68,27 +95,27 @@ public class PlayerController : MonoBehaviour
         {
             UnaimCamera();
         }
-        if (Input.GetMouseButtonDown(0) & isAiming)
+        if (photoAction.WasPressedThisFrame() & isAiming)
         {
             cameraItem.TakePhoto();
         }
 
-        if (Input.GetKey(KeyCode.LeftShift) & !isCrouching)
+        if (sprintAction.IsInProgress() & !isCrouching)
         {
             moveSpeed = walkSpeed * sprintMultiplier;
         }
 
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
+        float horizontalInput = moveAction.ReadValue<Vector2>().x;
+        float verticalInput = moveAction.ReadValue<Vector2>().y;
         rigidBody.linearVelocity = Quaternion.Euler(0, cameraObject.transform.rotation.eulerAngles.y, 0) * new Vector3(horizontalInput * moveSpeed, rigidBody.linearVelocity.y, verticalInput * moveSpeed);
 
         // Jumping
-        if (Input.GetButtonDown("Jump") && IsGrounded())
+        if (jumpAction.WasPressedThisFrame() && IsGrounded())
         {
             rigidBody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (photoAction.WasPressedThisFrame())
         {
             LockMouse();
         }
@@ -136,14 +163,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void UnlockMouse()
+    public void UnlockMouse()
     {
+        isUIOpen = true;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
-    void LockMouse()
+    public void LockMouse()
     {
+        isUIOpen = false;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

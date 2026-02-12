@@ -30,7 +30,7 @@ public class CameraHUDUpdate : MonoBehaviour
     {
         while (true)
         {
-            hudInfo.text = $"2560 x 1920 @ {(int)(1f / Time.deltaTime)}fps";
+            hudInfo.text = $"2560 x 1920 @ {(int)(1f / Time.smoothDeltaTime)}fps";
             yield return new WaitForSeconds(1f);
         }
     }

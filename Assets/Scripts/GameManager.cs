@@ -9,7 +9,15 @@ public class GameManager : MonoBehaviour
     [Header("References")]
     public PhotoScoringManager photoScoringManager;
     public List<GameObject> objectsToCapture;
-    [SerializeField] private TextMeshProUGUI tasksListText;
+    [SerializeField] private TextMeshProUGUI mushroomTaskText;
+    public GameObject mushroomTaskUntick;
+    public GameObject mushroomTaskTick;
+    public GameObject mushroomTaskStrike;
+    [SerializeField] private TextMeshProUGUI catTaskText;
+    public GameObject catTaskUntick;
+    public GameObject catTaskTick;
+    public GameObject catTaskStrike;
+    public GameObject anythingTask;
     public static GameManager Instance;
 
     public int currentObjectIndex = 0;
@@ -33,12 +41,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void IncrementObjectIndex()
     {
         currentObjectIndex++;
@@ -47,17 +49,41 @@ public class GameManager : MonoBehaviour
 
     private void RedrawTasks()
     {
-        if (currentObjectIndex <= 0)
+        switch (currentObjectIndex)
         {
-            tasksListText.text = "A Blue Mushroom\nA Cat";
-        }
-        if (currentObjectIndex == 1)
-        {
-            tasksListText.text = "A Cat";
-        }
-        if (currentObjectIndex > 1)
-        {
-            tasksListText.text = "Anything!";
+            case <= 0:
+                mushroomTaskText.color = Color.black;
+                catTaskText.color = Color.black;
+                mushroomTaskUntick.SetActive(true);
+                catTaskUntick.SetActive(true);
+                mushroomTaskTick.SetActive(false);
+                catTaskTick.SetActive(false);
+                mushroomTaskStrike.SetActive(false);
+                catTaskStrike.SetActive(false);
+                anythingTask.SetActive(false);
+                break;
+            case 1:
+                mushroomTaskText.color = Color.grey;
+                catTaskText.color = Color.black;
+                mushroomTaskUntick.SetActive(false);
+                catTaskUntick.SetActive(true);
+                mushroomTaskTick.SetActive(true);
+                catTaskTick.SetActive(false);
+                mushroomTaskStrike.SetActive(true);
+                catTaskStrike.SetActive(false);
+                anythingTask.SetActive(false);
+                break;
+            case > 1:
+                mushroomTaskText.color = Color.grey;
+                catTaskText.color = Color.grey;
+                mushroomTaskUntick.SetActive(false);
+                catTaskUntick.SetActive(false);
+                mushroomTaskTick.SetActive(true);
+                catTaskTick.SetActive(true);
+                mushroomTaskStrike.SetActive(true);
+                catTaskStrike.SetActive(true);
+                anythingTask.SetActive(true);
+                break;
         }
     }
 }

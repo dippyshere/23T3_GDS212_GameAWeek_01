@@ -40,7 +40,7 @@ public class PhotoScoringManager : MonoBehaviour
     private float CalculateVisibility(GameObject photoObject)
     {
         Renderer meshRenderer = photoObject.GetComponent<Renderer>();
-        if (meshRenderer == null)
+        if (!meshRenderer)
         {
             meshRenderer = photoObject.GetComponentInChildren<Renderer>();
         }
@@ -62,7 +62,7 @@ public class PhotoScoringManager : MonoBehaviour
     private float CalculateObjectVisibility(GameObject photoObject)
     {
         Renderer objectRenderer = photoObject.GetComponent<Renderer>();
-        if (objectRenderer == null)
+        if (!objectRenderer)
         {
             objectRenderer = photoObject.GetComponentInChildren<Renderer>();
         }
@@ -84,19 +84,21 @@ public class PhotoScoringManager : MonoBehaviour
                         bounds.min.y + y * stepY,
                         bounds.min.z + z * stepZ
                     );
-                    RaycastHit hit;
-                    if (Physics.Linecast(cameraObject.transform.position, gridPoint, out hit, ~(1 << LayerMask.NameToLayer("Camera"))))
+                    if (!Physics.Linecast(cameraObject.transform.position, gridPoint, out RaycastHit hit,
+                            ~(1 << LayerMask.NameToLayer("Camera"))))
                     {
-                        // Check if the raycast hit the object
-                        if (hit.collider.gameObject == photoObject)
-                        {
-                            numHits++;
-                            Debug.DrawLine(cameraObject.transform.position, gridPoint, Color.red, 10.0f);
-                        }
-                        else
-                        {
-                            Debug.DrawLine(cameraObject.transform.position, gridPoint, Color.green, 10.0f);
-                        }
+                        continue;
+                    }
+
+                    // Check if the raycast hit the object
+                    if (hit.collider.gameObject == photoObject)
+                    {
+                        numHits++;
+                        Debug.DrawLine(cameraObject.transform.position, gridPoint, Color.red, 10.0f);
+                    }
+                    else
+                    {
+                        Debug.DrawLine(cameraObject.transform.position, gridPoint, Color.green, 10.0f);
                     }
                 }
             }
@@ -147,7 +149,7 @@ public class PhotoScoringManager : MonoBehaviour
         float screenWidth = Screen.width;
         float screenHeight = Screen.height;
         Renderer objectRenderer = photoObject.GetComponent<Renderer>();
-        if (objectRenderer == null)
+        if (!objectRenderer)
         {
             objectRenderer = photoObject.GetComponentInChildren<Renderer>();
         }
