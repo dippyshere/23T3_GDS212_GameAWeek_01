@@ -19,6 +19,7 @@ public class SaveLoad : MonoBehaviour
         string photosString = PlayerPrefs.GetString("photos", "");
         string[] photoGuids = photosString.Split(',');
         totalPhotosToLoad = photoGuids.Length;
+        Array.Reverse(photoGuids);
         foreach (Transform child in photoContainer.transform)
         {
             Destroy(child.gameObject);
@@ -55,7 +56,6 @@ public class SaveLoad : MonoBehaviour
         loadingScreen.SetActive(true);
         while (totalPhotosToLoad > 0)
         {
-            scrollRect.verticalNormalizedPosition = 1f;
             yield return null;
         }
         loadingScreen.SetActive(false);

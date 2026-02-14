@@ -313,6 +313,17 @@
                 },
                 {
                     "name": "",
+                    "id": "97003819-124c-4dc1-86d3-382a89f4b807",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Photo",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "10872ccf-32c4-4a4c-955c-0358148d63c8",
                     "path": "<Keyboard>/ctrl",
                     "interactions": "",

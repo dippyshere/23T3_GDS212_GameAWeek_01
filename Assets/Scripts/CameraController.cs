@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class CameraController : MonoBehaviour
 {
@@ -32,6 +34,8 @@ public class CameraController : MonoBehaviour
     private Camera cameraComponent => cameraObject.GetComponent<Camera>();
     private bool wasInactive = false;
     private GameObject captureObject;
+
+    public GameObject SDCard;
 
     private string[] compliments = {
         "Great shot!",
@@ -99,6 +103,18 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        if (PlayerPrefs.GetString("photos", "") == "")
+        {
+            SDCard.SetActive(false);
+        }
+        else
+        {
+            SDCard.SetActive(true);
+        }
+    }
+
     public void Aim()
     {
         isAiming = true;
@@ -113,6 +129,7 @@ public class CameraController : MonoBehaviour
 
     public void TakePhoto()
     {
+        SDCard.SetActive(true);
         photoPreviewAnimator.SetTrigger(Photo);
         photoFlashAnimator.SetTrigger(Photo);
         StartCoroutine(CapturePhoto());
@@ -134,30 +151,23 @@ public class CameraController : MonoBehaviour
         }
         // tempararily create a new RT for capturing at a higher resolution with AA
         RenderTexture oldRT = cameraComponent.targetTexture;
-        RenderTexture tempRT = RenderTexture.GetTemporary(2560, 1920, 24, RenderTextureFormat.Default, RenderTextureReadWrite.Default, 2);
-        cameraComponent.targetTexture = tempRT;
-        cameraComponent.Render();
-        RenderTexture.active = tempRT;
+        //RenderTexture tempRT = RenderTexture.GetTemporary(2560, 1920, 16, RenderTextureFormat.Default, RenderTextureReadWrite.Default, 1);
+        //cameraComponent.targetTexture = tempRT;
+        //cameraComponent.Render();
+        RenderTexture.active = oldRT;
         // convert the RT to a texture
-        Texture2D photo = new Texture2D(2560, 1920, TextureFormat.RGB24, false);
-        photo.ReadPixels(new Rect(0, 0, 2560, 1920), 0, 0);
+        Texture2D photo = new Texture2D(640, 480, TextureFormat.RGB24, false);
+        photo.ReadPixels(new Rect(0, 0, 640, 480), 0, 0);
         photo.Apply();
-        cameraComponent.targetTexture = oldRT;
+        //cameraComponent.targetTexture = oldRT;
         RenderTexture.active = null;
-        RenderTexture.ReleaseTemporary(tempRT);
+        //RenderTexture.ReleaseTemporary(tempRT);
         if (wasInactive)
         {
             cameraObject.SetActive(false);
         }
         photoPreview.texture = photo;
-        if (Random.Range(0, 2) == 0)
-        {
-            photoPreview.transform.parent.rotation = Quaternion.Euler(0, 0, Random.Range(-12f, -5f));
-        }
-        else
-        {
-            photoPreview.transform.parent.rotation = Quaternion.Euler(0, 0, Random.Range(5f, 12f));
-        }
+        photoPreview.transform.parent.rotation = Quaternion.Euler(0, 0, Random.Range(0, 2) == 0 ? Random.Range(-12f, -5f) : Random.Range(5f, 12f));
         // assign a unique identifier (uuidv4) to the photo, append it to the list of photos, and save it to disk
         string uuid = System.Guid.NewGuid().ToString();
         byte[] bytes = photo.EncodeToPNG();
@@ -170,18 +180,12 @@ public class CameraController : MonoBehaviour
         string photos = PlayerPrefs.GetString("photos", "");
         photos += uuid + ",";
         PlayerPrefs.SetString("photos", photos);
-        if (GameManager.Instance.currentObjectIndex >= 2)
-        {
-            captureObject = debugPhotoObject;
-        }
-        else
-        {
-            captureObject = GameManager.Instance.objectsToCapture[GameManager.Instance.currentObjectIndex];
-        }
+        captureObject = GameManager.Instance.currentObjectIndex >= 2 ? debugPhotoObject : GameManager.Instance.objectsToCapture[GameManager.Instance.currentObjectIndex];
         photoPreviewText.text = captureObject.name;
         List<float> photoScore = photoScoringManager.ScorePhoto(captureObject);
         Debug.Log("Photo score: Visibility: " + photoScore[0] + " Object Visibility: " + photoScore[1] + " Centering: " + photoScore[3] + " Rule of Thirds: " + photoScore[4]);
         PlayerPrefs.SetString(uuid, string.Join(",", photoScore));
+        PlayerPrefs.Save();
         if (photoScore[0] > 0)
         {
             photoScores.text = $"\nVisibility: {Mathf.CeilToInt(photoScore[1] * photoScoringManager.objectVisibilityWeight)}";

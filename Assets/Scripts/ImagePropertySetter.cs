@@ -20,7 +20,7 @@ public class ImagePropertySetter : MonoBehaviour
         }
 
         byte[] imageData = System.IO.File.ReadAllBytes(imagePath);
-        Texture2D texture = new Texture2D(2, 2);
+        Texture2D texture = new Texture2D(640, 480, TextureFormat.RGB24, false);
         texture.LoadImage(imageData);
         image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         // set the timestamp text to the file creation time of the photo if it exists, formatted as an ISO 8601 string (e.g. "2024-06-01T12:34:56.789Z")
@@ -66,16 +66,13 @@ public class ImagePropertySetter : MonoBehaviour
     {
         // open the photo in the default image viewer application
         string imagePath = System.IO.Path.Combine(Application.persistentDataPath, "Photos", _imageGuid + ".png");
-        if (System.IO.File.Exists(imagePath))
-        {
-            Application.OpenURL(imagePath);
-        }
-        else if (Application.platform == RuntimePlatform.WebGLPlayer)
-        {
-            byte[] imageData = System.IO.File.ReadAllBytes(imagePath);
-            string base64 = System.Convert.ToBase64String(imageData);
-            string url = "data:image/png;base64," + base64;
-            Application.OpenURL(url);
-        }
+#if UNITY_WEBGL && !UNITY_EDITOR
+        byte[] imageData = System.IO.File.ReadAllBytes(imagePath);
+        string blobUrl = BlobManager.GetImageAsBlobUrl(imageData);
+        Application.OpenURL(blobUrl);
+        BlobManager.RevokeBlobURL(blobUrl);
+#else
+        Application.OpenURL(imagePath);
+#endif
     }
 }

@@ -34,6 +34,10 @@ public class PlayerController : MonoBehaviour
     InputAction photoAction;
     InputAction SDCardAction;
 
+    public PlayRandomSound captureSound;
+    public PlayRandomSound aimSound;
+    public PlayRandomSound sdCardSound;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -53,6 +57,7 @@ public class PlayerController : MonoBehaviour
     {
         if (SDCardAction.WasPressedThisFrame())
         {
+            sdCardSound.PlayRandomAudioClip();
             if (isUIOpen)
             {
                 saveLoad.HideImages();
@@ -97,6 +102,7 @@ public class PlayerController : MonoBehaviour
         }
         if (photoAction.WasPressedThisFrame() & isAiming)
         {
+            captureSound.PlayRandomAudioClip();
             cameraItem.TakePhoto();
         }
 
@@ -147,20 +153,25 @@ public class PlayerController : MonoBehaviour
 
     private void AimCamera()
     {
-        if (!isAiming)
+        if (isAiming)
         {
-            cameraItem.Aim();
-            isAiming = true;
+            return;
         }
+
+        aimSound.PlayRandomAudioClip();
+        cameraItem.Aim();
+        isAiming = true;
     }
 
     private void UnaimCamera()
     {
-        if (isAiming)
+        if (!isAiming)
         {
-            cameraItem.Unaim();
-            isAiming = false;
+            return;
         }
+
+        cameraItem.Unaim();
+        isAiming = false;
     }
 
     public void UnlockMouse()
